@@ -1,4 +1,5 @@
-const tweetsData = window.tweetsData || []
+import { tweetsData } from './data.js'
+
 const uuidv4 = () => {
   if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
     return crypto.randomUUID()
@@ -11,38 +12,46 @@ const uuidv4 = () => {
   })
 }
 
-document.addEventListener('keydown', (e) => {
-  if (e.target.id === 'tweet-input' && e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
-    document.getElementById('tweet-btn').click()
+let eventsBound = false
+
+function bindEvents(){
+  if (eventsBound) return
+
+  document.addEventListener('keydown', (e) => {
+    if (e.target.id === 'tweet-input' && e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+      document.getElementById('tweet-btn').click()
     }
     else if (e.target.classList.contains('reply-input') && e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
         e.target.closest('.reply-text').querySelector('.send-reply').click();
     }
-})
+  })
 
-document.addEventListener('click', function(e){
-    if(e.target.dataset.like){
-       handleLikeClick(e.target.dataset.like) 
-    }
-    else if(e.target.dataset.retweet){
-        handleRetweetClick(e.target.dataset.retweet)
-    }
-    else if(e.target.dataset.reply){
-        handleReplyClick(e.target.dataset.reply)
-    }
-    else if(e.target.id === 'tweet-btn'){
-        handleTweetBtnClick()
-    }
-    else if(e.target.id === 'replyto'){  
-        handleReplytoClick(e.target.dataset.replyto)
-    }
-    else if(e.target.id === 'close-btn') {
-        handleCloseClick(e.target.dataset.close)
-    }
-    else if (e.target.closest('.send-reply')) {
-      handleReplyBtnClick(e.target.closest('.send-reply'));
-    }
-})
+  document.addEventListener('click', function(e){
+      if(e.target.dataset.like){
+         handleLikeClick(e.target.dataset.like) 
+      }
+      else if(e.target.dataset.retweet){
+          handleRetweetClick(e.target.dataset.retweet)
+      }
+      else if(e.target.dataset.reply){
+          handleReplyClick(e.target.dataset.reply)
+      }
+      else if(e.target.id === 'tweet-btn'){
+          handleTweetBtnClick()
+      }
+      else if(e.target.id === 'replyto'){  
+          handleReplytoClick(e.target.dataset.replyto)
+      }
+      else if(e.target.id === 'close-btn') {
+          handleCloseClick(e.target.dataset.close)
+      }
+      else if (e.target.closest('.send-reply')) {
+        handleReplyBtnClick(e.target.closest('.send-reply'));
+      }
+  })
+
+  eventsBound = true
+}
  
 function handleLikeClick(tweetId){ 
     const targetTweetObj = tweetsData.filter(function(tweet){
@@ -90,7 +99,7 @@ function handleReplyBtnClick(btn) {
 
   tweet.replies.unshift({
     handle: '@Godzilla',
-    profilePic: 'images/godz.webp',
+    profilePic: '/images/godz.webp',
     likes: 0,
     retweets: 0,
     tweetText: text,
@@ -115,7 +124,7 @@ function handleTweetBtnClick(){
     if(tweetInput.value){
         tweetsData.unshift({
             handle: `@Godzilla`,
-            profilePic: `images/godz.webp`,
+            profilePic: `/images/godz.webp`,
             likes: 0,
             retweets: 0,
             tweetText: tweetInput.value,
@@ -232,4 +241,9 @@ function render(){
     document.getElementById('feed').innerHTML = getFeedHtml()
 }
 
-render()
+export function initApp() {
+  bindEvents()
+  render()
+}
+
+// main.js will call initApp once the bundle has loaded
